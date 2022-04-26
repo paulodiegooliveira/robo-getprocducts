@@ -4,7 +4,13 @@ const fs = require("fs");
 const fetch = require("node-fetch");
 const { convertToSlug, formatDate } = require("./Util.js");
 const baseURL = "http://localhost:3333";
-const pageURL = "https://galvanotek.com.br/produtos/linha/flower/8/";
+
+const pageURL = "https://galvanotek.com.br/produtos/linha/millenium/5/";
+// const category = 35; [descartáveis]
+const subcategory = 67;
+
+// const pageURL = "https://galvanotek.com.br/produtos/linha/flv/13/"; [ERROR]
+// const subcategory = 52;
 
 /**
  * DOWNLOAD SINGLE IMAGE
@@ -102,7 +108,7 @@ async function createDataDb(url, obj) {
       pdt_created: String(formatDate(new Date())),
       pdt_brand: 3,
       pdt_category: 35,
-      pdt_subcategory: 51,
+      pdt_subcategory: subcategory,
       pdt_status: 0,
       pdt_inventory: 10000000,
       pdt_delivered: 0,
