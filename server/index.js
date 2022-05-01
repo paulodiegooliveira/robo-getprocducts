@@ -3,7 +3,7 @@ const express = require("express");
 const cors = require("cors");
 const app = express();
 const mysql = require("mysql2");
-const { convertToSlug } = require("../Util");
+const { convertToSlug, formatDate } = require("../Util");
 const connection = mysql.createPool({
   // const connection = mysql.createConnection({
   host: "localhost",
@@ -32,6 +32,7 @@ app.get("/products/:id", (req, res) => {
 
 app.post("/products/", (req, res) => {
   const {
+    pdt_code,
     pdt_title,
     pdt_subtitle,
     pdt_cover,
@@ -50,11 +51,12 @@ app.post("/products/", (req, res) => {
   const imageNameNew =
     convertToSlug(imageNameClean) + "." + convertToSlug(imageNameExt);
 
-  let queryInsert = `INSERT INTO ws_products ( pdt_title, pdt_subtitle, pdt_cover, pdt_content, pdt_created, pdt_brand, pdt_category, pdt_subcategory, pdt_status, pdt_inventory, pdt_delivered) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+  let queryInsert = `INSERT INTO ws_products ( pdt_code, pdt_title, pdt_subtitle, pdt_cover, pdt_content, pdt_created, pdt_brand, pdt_category, pdt_subcategory, pdt_status, pdt_inventory, pdt_delivered) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
 
   connection.query(
     queryInsert,
     [
+      pdt_code,
       pdt_title,
       pdt_subtitle,
       imageNameNew,
@@ -74,7 +76,15 @@ app.post("/products/", (req, res) => {
         if (results.insertId) {
           const titleSlug = convertToSlug(pdt_title);
           const productId = results.insertId;
-          let queryUpdate = `UPDATE ws_products SET pdt_cover='images/2022/04/${productId}-${imageNameNew}', pdt_status=1, pdt_name='${titleSlug}' WHERE pdt_id = ${results.insertId}`;
+          const pdtCode = results.insertId.toString().padStart(4, "0");
+
+          let queryUpdate = `UPDATE 
+                              ws_products 
+                            SET 
+                              pdt_code="${pdtCode}", 
+                              pdt_cover='images/2022/04/${productId}-${imageNameNew}',
+                              pdt_name='${titleSlug}' 
+                            WHERE pdt_id = ${results.insertId}`;
           connection.query(queryUpdate, function (err, results, fields) {
             if (err) {
               throw err;
@@ -91,7 +101,7 @@ app.post("/products/", (req, res) => {
                 //     //     if (err) console.log("ERROR: " + err);
                 //     //   }
                 //     // );
-                console.log({ results, productId });
+                console.log({ productId: "ok!", pdtCode, productId });
                 return res.json({ results, productId });
                 // }
                 // );
@@ -99,6 +109,28 @@ app.post("/products/", (req, res) => {
             }
           });
         }
+      }
+    }
+  );
+});
+
+app.post("/category/create", (req, res) => {
+  const { subcategory } = req.body;
+
+  let queryInsertCat = `INSERT INTO ws_products_categories ( cat_parent, cat_title, cat_name, cat_created ) VALUES (?, ?, ?, ?)`;
+  connection.query(
+    queryInsertCat,
+    [
+      1,
+      subcategory,
+      convertToSlug(subcategory),
+      String(formatDate(new Date())),
+    ],
+    function (err, results, fields) {
+      if (err) {
+        throw err;
+      } else {
+        return res.json({ subcategory: "ok" });
       }
     }
   );

@@ -13,7 +13,6 @@
     "@types/react": "^18.0.0",
     "@types/react-dom": "^18.0.0",
     "cors": "^2.8.5",
-    "escape-filename": "^1.1.2",
     "express": "^4.17.3",
     "mysql2": "^2.3.3",
     "puppeteer": "^13.6.0",

@@ -1,6 +1,46 @@
-// fetch(baseURL + "3/products/68")
-//   .then((res) => res.text())
-//   .then((text) => console.log(text));
+const fs = require("fs");
+const fetch = require("node-fetch");
+
+async function downloadImg(urlImg, imgName, pdtId) {
+  const response = await fetch(urlImg);
+  const buffer = await response.buffer();
+  const imageNameClean = imgName.split(".")[0];
+  const imageNameExt = imgName.split(".").pop();
+  const imageNameNew =
+    convertToSlug(imageNameClean) + "." + convertToSlug(imageNameExt);
+
+  const fileWc = "../uploads/images/2022/04";
+  fs.writeFile(`${fileWc}/${pdtId}-${imageNameNew}`, buffer, () =>
+    console.log(`finished downloading! \n ${fileWc}/${pdtId}-${imageNameNew}`)
+  );
+}
+
+async function createDataDb(url, obj) {
+  await fetch(url + "/products", {
+    method: "POST",
+    body: JSON.stringify(obj),
+    headers: { "Content-Type": "application/json" },
+  })
+    .then((res) => res.json())
+    .then((json) => {
+      downloadImg(obj.pdt_img_link, obj.pdt_cover, json.productId);
+      console.log(json);
+    });
+}
+
+async function createCategory(url, subcategory) {
+  await fetch(`${url}/category/create`, {
+    method: "POST",
+    body: JSON.stringify({ subcategory }),
+    headers: { "Content-Type": "application/json" },
+  })
+    .then((res) => res.json())
+    .then((json) => console.log(json));
+}
+
+/*******************
+      UTILS
+*******************/
 
 function convertToSlug(Text) {
   return Text.toLowerCase()
@@ -30,4 +70,4 @@ function padTo2Digits(num) {
   return num.toString().padStart(2, "0");
 }
 
-module.exports = { convertToSlug, formatDate };
+module.exports = { convertToSlug, formatDate, createCategory, createDataDb };

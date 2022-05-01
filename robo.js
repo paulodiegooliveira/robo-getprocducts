@@ -5,9 +5,9 @@ const fetch = require("node-fetch");
 const { convertToSlug, formatDate } = require("./Util.js");
 const baseURL = "http://localhost:3333";
 
-const pageURL = "https://galvanotek.com.br/produtos/linha/millenium/5/";
+const pageURL = "https://galvanotek.com.br/produtos/linha/flv/13/";
 // const category = 35; [descartáveis]
-const subcategory = 67;
+const subcategory = 4;
 
 // const pageURL = "https://galvanotek.com.br/produtos/linha/flv/13/"; [ERROR]
 // const subcategory = 52;
@@ -23,7 +23,10 @@ async function downloadImg(urlImg, imgName, pdtId) {
   const imageNameNew =
     convertToSlug(imageNameClean) + "." + convertToSlug(imageNameExt);
 
-  fs.writeFile(`./uploads/${pdtId}-${imageNameNew}`, buffer, () =>
+  const fileWc =
+    "/Applications/XAMPP/xamppfiles/htdocs/sites/wc_aliancadistribuidora/uploads/images/2022/04";
+
+  fs.writeFile(`${fileWc}/${pdtId}-${imageNameNew}`, buffer, () =>
     console.log("finished downloading!")
   );
 }
@@ -73,10 +76,17 @@ async function createDataDb(url, obj) {
     await page.waitForSelector("img.lazyloaded");
     console.log("\n\nEntrei link", link);
 
-    // $$eva -> Array de imagens
-    const images = await page.$$eval(".carousel-item.pt-2 > img", (el) =>
-      el.map((link) => link.getAttribute("data-src"))
-    );
+    // // $$eva -> Array de imagens
+    // const images = await page.$$eval(".carousel-item.pt-2 > img", (el) =>
+    //   el.map((link) => link.getAttribute("data-src"))
+    // );
+
+    /*  Não quebra o codigo
+    const sellImg = await page.evaluate(() => {
+      const el = document.querySelector(".carousel-item.pt-2 > img");
+      if (!el) return null;
+      return el.getAttribute("data-src");
+    });*/
 
     // $eva -> Uma imagem
     // const image = await page.$eval("img.lazyloaded", (element) =>
@@ -91,32 +101,69 @@ async function createDataDb(url, obj) {
     // console.log(images);
     // }
 
-    const titles = await page.$eval(".extra", (element) =>
-      element.innerText.split("\n")
-    );
+    // DESCOMENTAR -----------------------------
+    // const titles = await page.$eval(".extra", (element) =>
+    //   element.innerText.split("\n")
+    // );
 
-    const Descriptions = await page.$eval(
-      ".extra",
-      (element) => element.innerText
-    );
+    // const Descriptions = await page.$eval(
+    //   ".extra",
+    //   (element) => element.innerText
+    // );
 
-    let obj = {
-      pdt_title: titles[0],
-      pdt_subtitle: titles[0],
-      pdt_cover: images[0].split("/").pop(),
-      pdt_content: Descriptions,
-      pdt_created: String(formatDate(new Date())),
-      pdt_brand: 3,
-      pdt_category: 35,
-      pdt_subcategory: subcategory,
-      pdt_status: 0,
-      pdt_inventory: 10000000,
-      pdt_delivered: 0,
-      pdt_img_link: images[0],
-    };
+    // let obj = {
+    //   pdt_title: titles[0],
+    //   pdt_subtitle: titles[0],
+    //   pdt_cover: images[0].split("/").pop(),
+    //   pdt_content: Descriptions,
+    //   pdt_created: String(formatDate(new Date())),
+    //   pdt_brand: 1,
+    //   pdt_category: 1,
+    //   pdt_subcategory: subcategory,
+    //   pdt_status: 0,
+    //   pdt_inventory: 10000000,
+    //   pdt_delivered: 0,
+    //   pdt_img_link: images[0],
+    // };
+    // DESCOMENTAR -----------------------------
 
-    // console.log(obj);
-    createDataDb(baseURL, obj);
+    const images = await page.evaluate(() => {
+      const el = document.querySelector(".carousel-item.pt-2 > img");
+      if (!el) return null;
+      return el.getAttribute("data-src");
+    });
+
+    const titles = await page.evaluate(() => {
+      const el = document.querySelector(".extra");
+      if (!el) return null;
+      return el.innerText.split("\n");
+    });
+
+    const Descriptions = await page.evaluate(() => {
+      const el = document.querySelector(".extra");
+      if (!el) return null;
+      return el.innerText;
+    });
+
+    if (images) {
+      let obj = {
+        pdt_title: titles ? titles[0] : "",
+        pdt_subtitle: titles ? titles[0] : "",
+        pdt_cover: images ? images.split("/").pop() : "",
+        pdt_content: Descriptions ? Descriptions : "",
+        pdt_created: String(formatDate(new Date())),
+        pdt_brand: 1,
+        pdt_category: 1,
+        pdt_subcategory: 10,
+        pdt_status: 1,
+        pdt_inventory: 10000000,
+        pdt_delivered: 0,
+        pdt_img_link: images,
+      };
+
+      console.log(obj);
+      // createDataDb(baseURL, obj);
+    }
   }
 
   await browser.close();

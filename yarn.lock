@@ -3206,13 +3206,6 @@ cosmiconfig@^7.0.0:
     path-type "^4.0.0"
     yaml "^1.10.0"
 
-cou@^1.4.0:
-  version "1.4.0"
-  resolved "https://registry.yarnpkg.com/cou/-/cou-1.4.0.tgz#d47f4bd9517d8b792beac59305a24559d3db8323"
-  integrity sha1-1H9L2VF9i3kr6sWTBaJFWdPbgyM=
-  dependencies:
-    min-is latest
-
 cross-fetch@3.1.5:
   version "3.1.5"
   resolved "https://registry.yarnpkg.com/cross-fetch/-/cross-fetch-3.1.5.tgz#e1389f44d9e7ba767907f7af8454787952ab534f"
@@ -3872,13 +3865,6 @@ escalade@^3.1.1:
   version "3.1.1"
   resolved "https://registry.yarnpkg.com/escalade/-/escalade-3.1.1.tgz#d8cfdc7000965c5a0174b4a82eaa5c0552742e40"
   integrity sha512-k0er2gUkLf8O0zKJiAhmkTnJlTvINGv7ygDNPbeIsX/TJjGJZHuh9B2UxbsaEkmlEo9MfhrSzmhIlhRlI2GXnw==
-
-escape-filename@^1.1.2:
-  version "1.1.2"
-  resolved "https://registry.yarnpkg.com/escape-filename/-/escape-filename-1.1.2.tgz#72a146ed29c8e2d4ff874ccbe5f8635c2ccd9e09"
-  integrity sha512-2eYdXOcvDIsMtBmcsLK4nBiUJz/bnIRGoTqrkCiLKFtpbqe1FN6LORzZ6cahZUVFau9qX8MMBMSkUsUw6OWiOQ==
-  dependencies:
-    min-util "^3.6.1"
 
 escape-goat@^2.0.0:
   version "2.1.1"
@@ -6165,18 +6151,6 @@ min-indent@^1.0.0:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/min-indent/-/min-indent-1.0.1.tgz#a63f681673b30571fbe8bc25686ae746eefa9869"
   integrity sha512-I9jwMn07Sy/IwOj3zVkVik2JTvgpaykDZEigL6Rx6N9LbMywwUSMtxET+7lVoDLLd3O3IXwJwvuuns8UB/HeAg==
-
-min-is@latest:
-  version "2.2.1"
-  resolved "https://registry.yarnpkg.com/min-is/-/min-is-2.2.1.tgz#ce07aec70bcfce05a76305dc740e879e562b1015"
-  integrity sha512-UVQvEn/ARV0JKy/qLrAUw2TU9Jzp1IGqNZhu77Bk2AgvQkCnJV0jrGl6PAaC14OcachDYrfiV5u9qYzeHrw8Fw==
-
-min-util@^3.6.1:
-  version "3.6.1"
-  resolved "https://registry.yarnpkg.com/min-util/-/min-util-3.6.1.tgz#4988f310c631f2578c05483163505b6bb76f01fc"
-  integrity sha512-6X/DI9isP4xANmARskKnG3+oJSitZTkckGo8vJrgoB6Yv5xis1fSU21Ir2zgLKYh68FLNUbz8ctz2Ialm4gkig==
-  dependencies:
-    cou "^1.4.0"
 
 mini-css-extract-plugin@^2.4.5:
   version "2.6.0"
