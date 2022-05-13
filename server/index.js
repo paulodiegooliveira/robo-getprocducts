@@ -9,7 +9,7 @@ const connection = mysql.createPool({
   host: "localhost",
   user: "root",
   password: "",
-  database: "db_aliancadistribuidora",
+  database: "db_seudb",
 });
 
 app.use(express.json());
