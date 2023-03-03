@@ -38,6 +38,26 @@ async function createCategory(url, subcategory) {
     .then((json) => console.log(json));
 }
 
+async function createBairrosDb(url, datas) {
+  await fetch(`${url}/bairros/create`, {
+    method: "POST",
+    body: JSON.stringify(datas),
+    headers: { "Content-Type": "application/json" },
+  })
+    .then((res) => res.json())
+    .then((json) => console.log(json));
+}
+
+async function createCepDb(url, datas) {
+  await fetch(`${url}/cep/create`, {
+    method: "POST",
+    body: JSON.stringify(datas),
+    headers: { "Content-Type": "application/json" },
+  })
+    .then((res) => res.json())
+    .then((json) => console.log(json));
+}
+
 /*******************
       UTILS
 *******************/
@@ -70,4 +90,11 @@ function padTo2Digits(num) {
   return num.toString().padStart(2, "0");
 }
 
-module.exports = { convertToSlug, formatDate, createCategory, createDataDb };
+module.exports = {
+  convertToSlug,
+  formatDate,
+  createCategory,
+  createDataDb,
+  createCepDb,
+  createBairrosDb,
+};

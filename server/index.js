@@ -9,19 +9,117 @@ const connection = mysql.createPool({
   host: "localhost",
   user: "root",
   password: "",
-  database: "db_seudb",
+  database: "db_cep",
 });
 
 app.use(express.json());
 app.use(cors());
 
-app.get("/products/:id", (req, res) => {
-  const { id } = req.params;
+/// BAIRRO ////////////////////////////////////
+/// BAIRRO ////////////////////////////////////
+/// BAIRRO ////////////////////////////////////
+
+// READ - All
+app.get("/bairro/:limit?/:offset?", (req, res) => {
+  const { limit, offset } = req.params;
+  const limitQuery = limit ? ` LIMIT ${limit}` : "";
+  const offsetQuery = offset ? ` OFFSET ${offset}` : "";
+
+  connection.query(
+    `SELECT * FROM bairros ${limitQuery} ${offsetQuery}`,
+    function (err, results, fields) {
+      if (err) return res.json(err);
+      if (res) return res.json(results);
+    }
+  );
+});
+
+// READ - lista bairro por name
+app.get("/bairro-name/:bairro", (req, res) => {
+  const { bairro } = req.params;
   // console.log(req.params);
 
   // simple query
   connection.query(
-    `SELECT * FROM ws_products WHERE pdt_id = ${id}`,
+    `SELECT * FROM bairros WHERE bairro LIKE '%${bairro}%'`,
+    function (err, results, fields) {
+      if (results) return res.json({ results });
+    }
+  );
+});
+
+// CREATE
+app.post("/bairros/create", (req, res) => {
+  const { bairro, bairro_link } = req.body;
+  console.log("##" + req.body);
+  let queryInsertCat = `INSERT INTO bairros ( bairro, bairro_link, created_at ) VALUES (?, ?, ?)`;
+  connection.query(
+    queryInsertCat,
+    [bairro, bairro_link, String(formatDate(new Date()))],
+    function (err, results, fields) {
+      if (err) {
+        throw err;
+      } else {
+        return res.json(req.body);
+      }
+    }
+  );
+});
+
+// UPDATE
+app.post("/bairros/update", (req, res) => {
+  const { zona, subzona, bairro } = req.body;
+
+  let queryRead = `SELECT * FROM bairros WHERE bairro LIKE '${bairro}%'`;
+
+  connection.query(queryRead, function (err, resultsRead, fields) {
+    if (resultsRead) {
+      let queryUpdate = `UPDATE bairros SET zona='${zona}', subzona='${subzona}' WHERE bairro LIKE '${bairro}%'`;
+
+      connection.query(queryUpdate, function (err, results, fields) {
+        if (err) {
+          throw err;
+        } else {
+          if (results.affectedRows) {
+            let queryRead = `SELECT * FROM bairros WHERE bairro LIKE '${bairro}%'`;
+            connection.query(queryRead, function (err, resultsRead, fields) {
+              return res.json(resultsRead);
+            });
+          }
+        }
+      });
+    } else {
+      return res.json({ err: "Sem resultado" });
+    }
+  });
+});
+
+/// CEP ////////////////////////////////////
+/// CEP ////////////////////////////////////
+/// CEP ////////////////////////////////////
+// lista ceps por id do bairro
+app.get("/cep/:idbairro/:limit?", (req, res) => {
+  const { idbairro, limit } = req.params;
+  const limitQuery = limit ? ` LIMIT ${limit}` : "";
+  // console.log(req.params);
+
+  // simple query
+  connection.query(
+    `SELECT * FROM ceps WHERE id_bairro = ${idbairro} ${limitQuery}`,
+    function (err, results, fields) {
+      if (err) return res.json(err);
+      if (results) return res.json(results);
+    }
+  );
+});
+
+// lista cep por name
+app.get("/cep/:cep", (req, res) => {
+  const { cep } = req.params;
+
+  // simple query
+  connection.query(
+    `SELECT * FROM ceps WHERE cep = ${cep}`,
     function (err, results, fields) {
       return res.json(results);
     }
@@ -30,152 +128,38 @@ app.get("/products/:id", (req, res) => {
   // return;
 });
 
-app.post("/products/", (req, res) => {
-  const {
-    pdt_code,
-    pdt_title,
-    pdt_subtitle,
-    pdt_cover,
-    pdt_content,
-    pdt_created,
-    pdt_brand,
-    pdt_category,
-    pdt_subcategory,
-    pdt_status,
-    pdt_inventory,
-    pdt_delivered,
-  } = req.body;
+app.post("/cep/create", (req, res) => {
+  const { cep, address, id_bairro } = req.body;
+  console.log("#" + req.body);
+  // simple query
 
-  const imageNameClean = pdt_cover.split(".")[0];
-  const imageNameExt = pdt_cover.split(".").pop();
-  const imageNameNew =
-    convertToSlug(imageNameClean) + "." + convertToSlug(imageNameExt);
+  // connection.query(
+  //   `SELECT * FROM ceps WHERE address != '${address}'`,
+  //   function (err, results, fields) {
+  //     if (err) return res.json(err);
 
-  let queryInsert = `INSERT INTO ws_products ( pdt_code, pdt_title, pdt_subtitle, pdt_cover, pdt_content, pdt_created, pdt_brand, pdt_category, pdt_subcategory, pdt_status, pdt_inventory, pdt_delivered) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
-
-  connection.query(
-    queryInsert,
-    [
-      pdt_code,
-      pdt_title,
-      pdt_subtitle,
-      imageNameNew,
-      pdt_content,
-      pdt_created,
-      pdt_brand,
-      pdt_category,
-      pdt_subcategory,
-      pdt_status,
-      pdt_inventory,
-      pdt_delivered,
-    ],
-    function (err, results, fields) {
-      if (err) {
-        throw err;
-      } else {
-        if (results.insertId) {
-          const titleSlug = convertToSlug(pdt_title);
-          const productId = results.insertId;
-          const pdtCode = results.insertId.toString().padStart(4, "0");
-
-          let queryUpdate = `UPDATE 
-                              ws_products 
-                            SET 
-                              pdt_code="${pdtCode}", 
-                              pdt_cover='images/2022/04/${productId}-${imageNameNew}',
-                              pdt_name='${titleSlug}' 
-                            WHERE pdt_id = ${results.insertId}`;
-          connection.query(queryUpdate, function (err, results, fields) {
-            if (err) {
-              throw err;
-            } else {
-              if (results.affectedRows) {
-                // let queryRead = `SELECT * FROM ws_products WHERE pdt_id = ${id}`;
-                // connection.query(
-                //   queryRead,
-                //   function (err, resultsRead, fields) {
-                //     // fs.rename( // Renomeia arquivos local
-                //     //   "/path/to/Afghanistan.png",
-                //     //   "/path/to/AF.png",
-                //     //   function (err) {
-                //     //     if (err) console.log("ERROR: " + err);
-                //     //   }
-                //     // );
-                console.log({ productId: "ok!", pdtCode, productId });
-                return res.json({ results, productId });
-                // }
-                // );
-              }
-            }
-          });
-        }
-      }
-    }
-  );
-});
-
-app.post("/category/create", (req, res) => {
-  const { subcategory } = req.body;
-
-  let queryInsertCat = `INSERT INTO ws_products_categories ( cat_parent, cat_title, cat_name, cat_created ) VALUES (?, ?, ?, ?)`;
+  // if (results) {
+  let queryInsertCat = `INSERT INTO ceps ( cep, address, id_bairro, created_at ) VALUES (?, ?, ?, ?)`;
   connection.query(
     queryInsertCat,
-    [
-      1,
-      subcategory,
-      convertToSlug(subcategory),
-      String(formatDate(new Date())),
-    ],
+    [cep, address, id_bairro, String(formatDate(new Date()))],
     function (err, results, fields) {
       if (err) {
         throw err;
       } else {
-        return res.json({ subcategory: "ok" });
+        return res.json(req.body);
       }
     }
   );
+  // return res.json(results);
+  // } else {
+  // return res.json("Já tem esse endereço cadastrado");
+  // }
+  // }
+  // );
 });
 
-// Renomeia imagem no BD
-app.put("/products/:id", (req, res) => {
-  const { id } = req.params;
-
-  let queryRead = `SELECT * FROM ws_products WHERE pdt_id = ${id}`;
-  connection.query(queryRead, function (err, resultsRead, fields) {
-    if (resultsRead) {
-      const imageName =
-        "images/2022/04/" +
-        resultsRead[0].pdt_id +
-        "-" +
-        convertToSlug(resultsRead[0].pdt_title) +
-        ".jpg";
-
-      const titleSlug = convertToSlug(resultsRead[0].pdt_title);
-
-      let queryUpdate = `UPDATE ws_products SET pdt_cover='${imageName}', pdt_status=1, pdt_name='${titleSlug}' WHERE pdt_id = ${id}`;
-      connection.query(queryUpdate, function (err, results, fields) {
-        if (err) {
-          throw err;
-        } else {
-          if (results.affectedRows) {
-            let queryRead = `SELECT * FROM ws_products WHERE pdt_id = ${id}`;
-            connection.query(queryRead, function (err, resultsRead, fields) {
-              // fs.rename( // Renomeia arquivos local
-              //   "/path/to/Afghanistan.png",
-              //   "/path/to/AF.png",
-              //   function (err) {
-              //     if (err) console.log("ERROR: " + err);
-              //   }
-              // );
-              return res.json(resultsRead);
-            });
-          }
-        }
-      });
-    }
-  });
-});
-
+////////////////////////////////////////////
 app.listen(3333, () => {
   console.log("🚀 Server started");
 });
