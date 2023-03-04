@@ -41,7 +41,8 @@ app.get("/bairro-name/:bairro", (req, res) => {
 
   // simple query
   connection.query(
-    `SELECT * FROM bairros WHERE bairro LIKE '%${bairro}%'`,
+    `SELECT * FROM bairros WHERE bairro = '${bairro}'`,
+    // `SELECT * FROM bairros WHERE bairro LIKE '%${bairro}%'`,
     function (err, results, fields) {
       if (results) return res.json({ results });
     }
@@ -51,7 +52,10 @@ app.get("/bairro-name/:bairro", (req, res) => {
 // CREATE
 app.post("/bairros/create", (req, res) => {
   const { bairro, bairro_link } = req.body;
-  console.log("##" + req.body);
+
+  console.log("\n##CONSOLE: SERVER - LINHA 54##");
+  console.log(req.body);
+
   let queryInsertCat = `INSERT INTO bairros ( bairro, bairro_link, created_at ) VALUES (?, ?, ?)`;
   connection.query(
     queryInsertCat,
@@ -130,15 +134,10 @@ app.get("/cep/:cep", (req, res) => {
 
 app.post("/cep/create", (req, res) => {
   const { cep, address, id_bairro } = req.body;
-  console.log("#" + req.body);
-  // simple query
 
-  // connection.query(
-  //   `SELECT * FROM ceps WHERE address != '${address}'`,
-  //   function (err, results, fields) {
-  //     if (err) return res.json(err);
+  console.log("\n##CONSOLE: SERVER - LINHA 136##");
+  console.log(req.body);
 
-  // if (results) {
   let queryInsertCat = `INSERT INTO ceps ( cep, address, id_bairro, created_at ) VALUES (?, ?, ?, ?)`;
   connection.query(
     queryInsertCat,
@@ -151,12 +150,6 @@ app.post("/cep/create", (req, res) => {
       }
     }
   );
-  // return res.json(results);
-  // } else {
-  // return res.json("Já tem esse endereço cadastrado");
-  // }
-  // }
-  // );
 });
 
 ////////////////////////////////////////////
